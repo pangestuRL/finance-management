@@ -1,5 +1,44 @@
 const prisma = require('../config/prisma');
 
+// ==========================================
+// HELPER: LOGIKA INTI TABUNGAN (CORE LOGIC)
+// ==========================================
+const injectGoalLogic = (goal) => {
+  // 1. Hitung Progress (%)
+  let progress = (goal.currentAmount / goal.targetAmount) * 100;
+  progress = parseFloat(progress.toFixed(2)); // Bulatkan max 2 angka di belakang koma
+
+  // 2. Hitung Expected Saving (Harapan Tabungan)
+  const today = new Date();
+  const createdDate = new Date(goal.createdAt);
+  
+  // Hitung sudah berapa bulan berlalu sejak dibuat
+  let monthsElapsed = (today.getFullYear() - createdDate.getFullYear()) * 12;
+  monthsElapsed -= createdDate.getMonth();
+  monthsElapsed += today.getMonth();
+
+  if (monthsElapsed < 0) monthsElapsed = 0;
+
+  // Harapan tabungan = bulan berlalu dikali target bulanan
+  const expectedSaving = monthsElapsed * goal.monthlyTarget;
+
+  // 3. Tentukan Status
+  let status = 'Behind';
+  if (goal.currentAmount >= goal.targetAmount) {
+    status = 'Completed'; // Sudah lunas!
+  } else if (goal.currentAmount >= expectedSaving) {
+    status = 'On Track'; // Tepat waktu / Aman
+  }
+
+  // Kembalikan semua data asli ditambah 3 data hasil hitungan
+  return {
+    ...goal,
+    progressPercent: progress,
+    expectedSaving: expectedSaving,
+    status: status
+  };
+};
+
 // 1. Buat Target Tabungan Baru (Create)
 const createGoal = async (req, res) => {
   try {
@@ -58,7 +97,10 @@ const getGoals = async (req, res) => {
       orderBy: { createdAt: 'desc' } // Urutkan dari yang paling baru dibuat
     });
 
-    res.json({ goals });
+    // Menyuntikkan Core Logic ke setiap tabungan yang ditemukan
+    const goalsWithLogic = goals.map(injectGoalLogic);
+
+    res.json({ goals: goalsWithLogic });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Terjadi kesalahan pada server' });
@@ -82,7 +124,10 @@ const getGoalDetail = async (req, res) => {
       return res.status(404).json({ message: 'Target tabungan tidak ditemukan!' });
     }
 
-    res.json({ goal });
+    // Menyuntikkan Core Logic ke detail tabungan
+    const goalWithLogic = injectGoalLogic(goal);
+
+    res.json({ goal: goalWithLogic });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Terjadi kesalahan pada server' });
