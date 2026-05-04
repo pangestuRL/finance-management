@@ -5,6 +5,7 @@ const morgan = require('morgan');
 
 const app = express();
 const authRoutes = require('./routes/authRoutes');
+const goalRoutes = require('./routes/goalRoutes');
 
 app.use(helmet());
 app.use(cors());
@@ -14,6 +15,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Memasang rute otentikasi di alamat /api/auth
 app.use('/api/auth', authRoutes);
+
+// Memasang rute goals di alamat /api/goals
+app.use('/api/goals', goalRoutes);
 app.get('/', (req, res) => {
   res.json({ message: 'Finance Management API' });
 });

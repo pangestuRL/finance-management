@@ -27,6 +27,7 @@ model Goal {
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   name          String
   targetAmount  Float
+  currentAmount Float    @default(0)
   deadline      DateTime
   monthlyTarget Float
   createdAt     DateTime @default(now())
