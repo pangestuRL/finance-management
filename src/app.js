@@ -7,6 +7,7 @@ const app = express();
 const authRoutes = require('./routes/authRoutes');
 const goalRoutes = require('./routes/goalRoutes');
 const transactionRoutes = require('./routes/transactionRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 app.use(helmet());
 app.use(cors());
@@ -22,6 +23,9 @@ app.use('/api/goals', goalRoutes);
 
 // Memasang rute transaksi di alamat /api/transactions
 app.use('/api/transactions', transactionRoutes);
+
+// Memasang rute dashboard pamungkas
+app.use('/api/dashboard', dashboardRoutes);
 app.get('/', (req, res) => {
   res.json({ message: 'Finance Management API' });
 });

@@ -176,5 +176,6 @@ module.exports = {
   createGoal,
   getGoals,
   getGoalDetail,
-  addSavings
+  addSavings,
+  injectGoalLogic // Diekspor untuk dipakai oleh dashboard
 };
