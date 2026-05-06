@@ -165,6 +165,21 @@ const addSavings = async (req, res) => {
       },
     });
 
+    // ==========================================
+    // SINKRONISASI KE RIWAYAT TRANSAKSI 🪄
+    // ==========================================
+    // Catat setoran ini sebagai pengeluaran (karena uang keluar dari dompet utama ke tabungan)
+    await prisma.transaction.create({
+      data: {
+        userId,
+        type: 'EXPENSE',
+        amount: parseFloat(amount),
+        category: `Setor Tabungan: ${existingGoal.name}`,
+        date: new Date(),
+        goalId: existingGoal.id
+      }
+    });
+
     res.json({ message: 'Setoran berhasil dicatat!', goal: updatedGoal });
   } catch (error) {
     console.error(error);
